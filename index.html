@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Redes Avanzado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f8ff; /* AliceBlue - un azul muy claro y suave */
+            color: #1e293b; /* Slate-800 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        #mynetwork {
+            width: 100%;
+            height: 550px; /* Un poco más de altura */
+            border: 2px solid #e2e8f0; /* Slate-200 */
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* Bordes redondeados consistentes */
+            box-shadow: 0 6px 10px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .main-panel-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1200px; /* Ancho máximo para paneles */
+            margin-bottom: 1.5rem;
+        }
+        .control-section { /* Nuevo contenedor para cada grupo de controles */
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+        }
+        .control-section h3 {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* semibold */
+            color: #0d9488; /* Teal-600 */
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ccfbf1; /* Teal-100 */
+        }
+        button, input[type="button"] {
+            transition: all 0.2s ease-in-out; 
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.625rem 1.25rem; /* py-2.5 px-5 */
+            font-weight: 500; /* medium */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        button:hover, input[type="button"]:hover {
+            transform: translateY(-1px);
+        }
+        .btn-primary {
+            background-color: #0d9488; /* Teal-600 */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0f766e; /* Teal-700 */
+        }
+        .btn-secondary {
+            background-color: #475569; /* Slate-600 */
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #334155; /* Slate-700 */
+        }
+        .btn-danger {
+            background-color: #e11d48; /* Rose-600 */
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #be123c; /* Rose-700 */
+        }
+
+        #messageBox {
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .message-success { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; } /* Green */
+        .message-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; } /* Red */
+        .message-info { background-color: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; } /* Sky */
+
+        input[type="text"], input[type="number"], select, textarea {
+            border-radius: 0.375rem; 
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #cbd5e1; /* Slate-300 */
+            width: 100%; 
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            border-color: #14b8a6; /* Teal-500 */
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.2); 
+        }
+        label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+            color: #334155; /* Slate-700 */
+        }
+        select {
+            appearance: none; 
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); /* Slate-500 arrow */
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem; 
+        }
+        .json-example {
+            background-color: #f8fafc; /* Slate-50 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem; 
+            overflow-x: auto; 
+            border: 1px solid #e2e8f0; /* Slate-200 */
+        }
+        .instructions-panel { /* Specific styling for instructions if needed */
+            background-color: #f8fafc; /* Slate-50, slightly different for distinction */
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="p-4 md:p-6">
+
+    <h1 class="text-3xl md:text-4xl font-bold text-center text-teal-700 mb-6">Simulador Avanzado de Topologías de Red</h1>
+
+    <div id="mynetwork" class="mb-6"></div>
+    <div id="messageBox"></div>
+
+    <div class="main-panel-container">
+        <div class="control-section">
+            <h3>Añadir Elementos a la Red</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="node-id">ID del Nodo (Ej: RouterA, Servidor1):</label>
+                    <input type="text" id="node-id">
+                </div>
+                <button onclick="addNode()" class="w-full btn-primary">Añadir Nodo</button>
+                <hr class="my-4 border-slate-200">
+                <div>
+                    <label for="edge-from">Desde (Nodo Origen):</label>
+                    <select id="edge-from"><option value="">Seleccionar nodo</option></select>
+                </div>
+                <div>
+                    <label for="edge-to">Hasta (Nodo Destino):</label>
+                    <select id="edge-to"><option value="">Seleccionar nodo</option></select>
+                </div>
+                <div>
+                    <label for="edge-weight">Peso (Latencia/Costo):</label>
+                    <input type="number" id="edge-weight" placeholder="Ej: 5" min="0">
+                </div>
+                <button onclick="addEdge()" class="w-full btn-primary">Añadir Enlace</button>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <h3>Gestionar Elementos Existentes</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="node-to-delete">Seleccionar Nodo para Eliminar:</label>
+                    <select id="node-to-delete"><option value="">Seleccionar nodo</option></select>
+                </div>
+                <button onclick="deleteNode()" class="w-full btn-danger">Eliminar Nodo Seleccionado</button>
+                <hr class="my-4 border-slate-200">
+                <div>
+                    <label for="edge-to-delete">Seleccionar Enlace para Eliminar:</label>
+                    <select id="edge-to-delete"><option value="">Seleccionar enlace</option></select>
+                </div>
+                <button onclick="deleteEdge()" class="w-full btn-danger">Eliminar Enlace Seleccionado</button>
+            </div>
+        </div>
+        
+        <div class="control-section">
+            <h3>Análisis y Simulación de Ruta</h3>
+            <p class="text-sm text-slate-500 mb-3">Haga clic en un enlace en el grafo para activarlo/desactivarlo y simular caídas.</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="start-node">Nodo Origen para Dijkstra:</label>
+                    <select id="start-node"><option value="">Seleccionar nodo</option></select>
+                </div>
+                <div>
+                    <label for="end-node">Nodo Destino para Dijkstra:</label>
+                    <select id="end-node"><option value="">Seleccionar nodo</option></select>
+                </div>
+                <button onclick="runDijkstra()" class="w-full btn-primary">Calcular Ruta Óptima</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-panel-container">
+        <div class="control-section md:col-span-2"> <h3>Cargar Topología desde JSON</h3>
+            <div class="space-y-3">
+                <div>
+                    <label for="json-input">Pegar JSON de la topología aquí:</label>
+                    <textarea id="json-input" rows="10" placeholder="Consulte las instrucciones para el formato JSON correcto."></textarea>
+                </div>
+                <button onclick="loadGraphFromJson()" class="w-full btn-primary">Cargar Topología JSON</button>
+            </div>
+        </div>
+        <div class="control-section">
+            <h3>Control General</h3>
+            <button onclick="resetGraphVisualization()" class="w-full btn-danger">
+                Reiniciar Simulación Completa
+            </button>
+        </div>
+    </div>
+    
+    <div class="instructions-panel control-section w-full max-w-4xl mx-auto mb-8"> <h3>Instrucciones de Uso</h3>
+        <p class="text-sm text-slate-600 mb-3">
+            Esta herramienta permite visualizar topologías de red, calcular la ruta óptima y simular la caída/reactivación de enlaces.
+        </p>
+        <h4 class="text-md font-semibold text-slate-700 mt-3 mb-1">Simulación de Caída/Reactivación de Enlaces:</h4>
+        <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
+            <li>Para simular que un enlace (arista) se ha caído, <strong>haz clic sobre la arista</strong> en el grafo. Se marcará como inactiva (gris, discontinua) y será ignorada por Dijkstra.</li>
+            <li>Vuelve a hacer clic sobre una arista inactiva para reactivarla.</li>
+        </ul>
+
+        <h4 class="text-md font-semibold text-slate-700 mt-4 mb-1">Carga Masiva con JSON:</h4>
+        <p class="text-sm text-slate-600 mb-2">
+            Formato JSON esperado (reemplaza el grafo actual):
+        </p>
+        <div class="json-example">
+            <pre>
+{
+  "nodes": [
+    { "id": "R1", "label": "Router Central", "x": 0, "y": 0 },
+    { "id": "S1", "label": "Switch A", "x": 150, "y": 100 },
+    { "id": "PC1", "label": "PC Usuario", "x": 150, "y": 200 }
+  ],
+  "edges": [
+    { "from": "R1", "to": "S1", "weight": 1 },
+    { "from": "S1", "to": "PC1", "weight": 1, "active": true, "label": "Conexión PC" }
+  ]
+}
+            </pre>
+        </div>
+        <ul class="list-disc list-inside mt-3 text-sm text-slate-600 space-y-1">
+            <li><code>"nodes"</code>: Array de objetos nodo.
+                <ul>
+                    <li><code>id</code> (obligatorio): Identificador único.</li>
+                    <li><code>label</code> (opcional): Etiqueta del nodo.</li>
+                    <li><code>x</code>, <code>y</code> (opcional): Coordenadas. Si se proveen, el nodo se posiciona allí y no será movido por físicas <strong>hasta que lo arrastres</strong>.</li>
+                </ul>
+            </li>
+            <li><code>"edges"</code>: Array de objetos enlace. <code>from</code>, <code>to</code>, <code>weight</code> son obligatorios.
+                <ul>
+                    <li><code>label</code> (opcional): Etiqueta para el enlace.</li>
+                    <li><code>active</code> (opcional): Booleano (<code>true</code> o <code>false</code>). Por defecto <code>true</code>.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <script type="text/javascript">
+        // Constantes de colores para aristas
+        const DEFAULT_EDGE_COLOR = '#52525b'; // Zinc-600 (un gris más neutro y oscuro)
+        const DEFAULT_EDGE_HIGHLIGHT_COLOR = '#14b8a6'; // Teal-500
+        const DEFAULT_EDGE_HOVER_COLOR = '#0d9488'; // Teal-600
+        const INACTIVE_EDGE_COLOR = '#a1a1aa'; // Zinc-400 (gris claro para inactivas)
+        const DIJKSTRA_PATH_EDGE_COLOR = '#f43f5e'; // Rose-500
+        const DIJKSTRA_PATH_NODE_BORDER_COLOR = '#be123c'; // Rose-700
+        const DIJKSTRA_PATH_NODE_BG_COLOR = '#f43f5e'; // Rose-500
+
+
+        const container = document.getElementById('mynetwork');
+        const visNodes = new vis.DataSet([]);
+        const visEdges = new vis.DataSet([]);
+        const options = {
+            layout: {
+                hierarchical: false, 
+                improvedLayout: true,
+            },
+            edges: {
+                arrows: { to: { enabled: true, scaleFactor: 0.7 } }, 
+                color: {
+                    color: DEFAULT_EDGE_COLOR, 
+                    highlight: DEFAULT_EDGE_HIGHLIGHT_COLOR, 
+                    hover: DEFAULT_EDGE_HOVER_COLOR
+                },
+                font: { align: 'top', color: '#3f3f46' /* Zinc-700 */ },
+                smooth: { enabled: true, type: "dynamic" },
+                width: 2.5, // Ligeramente más gruesas
+            },
+            nodes: {
+                shape: 'dot', // Cambiado a 'dot' para un look más de red
+                size: 18,    // Ajustar tamaño para 'dot'
+                font: {
+                    size: 14,
+                    color: '#18181b', /* Zinc-900, para contraste con el nodo */
+                    strokeWidth: 0, // Sin borde en el texto del nodo
+                    background: 'rgba(255,255,255,0.7)', // Fondo semi-transparente para legibilidad
+                    padding: 3,
+                    borderRadius: 3,
+                },
+                color: { // Colores base de nodos
+                    border: '#0d9488', /* Teal-600 */
+                    background: '#5eead4', /* Teal-300 */
+                    highlight: {
+                        border: '#0f766e', /* Teal-700 */
+                        background: '#2dd4bf' /* Teal-400 */
+                    }
+                },
+                borderWidth: 2.5,
+            },
+            physics: {
+                enabled: true, 
+                solver: 'barnesHut', 
+                barnesHut: {
+                    gravitationalConstant: -8000, // Aumentado para más dispersión
+                    centralGravity: 0.15,      
+                    springLength: 110,         
+                    springConstant: 0.05,
+                    damping: 0.09, 
+                    avoidOverlap: 0.2 // Aumentado para evitar solapamiento
+                },
+                stabilization: { iterations: 2000, fit: true }
+            },
+            interaction: {
+                hover: true, 
+                tooltipDelay: 150, 
+                dragNodes: true, 
+                dragView: true, 
+                zoomView: true,
+                multiselect: false, // Simplificar, no selección múltiple por ahora
+            }
+        };
+        const network = new vis.Network(container, { nodes: visNodes, edges: visEdges }, options);
+
+        let highlightedDijkstraEdges = [];
+
+        // Selectores del DOM
+        const nodeIdInput = document.getElementById('node-id');
+        const edgeFromSelect = document.getElementById('edge-from');
+        const edgeToSelect = document.getElementById('edge-to');
+        const edgeWeightInput = document.getElementById('edge-weight');
+        const startNodeSelect = document.getElementById('start-node');
+        const endNodeSelect = document.getElementById('end-node');
+        const nodeToDeleteSelect = document.getElementById('node-to-delete');
+        const edgeToDeleteSelect = document.getElementById('edge-to-delete');
+        const messageBox = document.getElementById('messageBox');
+        const jsonInput = document.getElementById('json-input');
+
+        function showMessage(text, type = 'info', duration = 5000) {
+            messageBox.textContent = text;
+            messageBox.className = 'mb-6 '; 
+            if (type === 'success') messageBox.classList.add('message-success');
+            else if (type === 'error') messageBox.classList.add('message-error');
+            else messageBox.classList.add('message-info');
+            
+            setTimeout(() => {
+                if (messageBox.textContent === text) { // Solo limpiar si es el mismo mensaje
+                    messageBox.textContent = '';
+                    messageBox.className = 'mb-6';
+                }
+            }, duration); 
+        }
+
+        function updateAllSelectors() {
+            updateNodeSelectors();
+            updateEdgeSelectors();
+        }
+
+        function updateNodeSelectors() {
+            const nodes = visNodes.get({ fields: ['id', 'label'], order: 'label' });
+            const selectors = [edgeFromSelect, edgeToSelect, startNodeSelect, endNodeSelect, nodeToDeleteSelect];
+            
+            selectors.forEach(sel => {
+                const currentValue = sel.value;
+                while (sel.options.length > 1) sel.remove(1); // Conservar la opción "Seleccionar..."
+                nodes.forEach(node => {
+                    const option = new Option(node.label || node.id, node.id);
+                    sel.add(option);
+                });
+                sel.value = visNodes.get(currentValue) ? currentValue : ""; // Restaurar selección si aún existe
+            });
+        }
+        
+        function updateEdgeSelectors() {
+            const edges = visEdges.get({ fields: ['id', 'from', 'to', 'label', 'value'], order: 'from' });
+            const currentValue = edgeToDeleteSelect.value;
+            while (edgeToDeleteSelect.options.length > 1) edgeToDeleteSelect.remove(1);
+
+            edges.forEach(edge => {
+                const fromNode = visNodes.get(edge.from);
+                const toNode = visNodes.get(edge.to);
+                const fromLabel = fromNode ? (fromNode.label || fromNode.id) : edge.from;
+                const toLabel = toNode ? (toNode.label || toNode.id) : edge.to;
+                const edgeDisplayLabel = `${fromLabel} → ${toLabel} (Peso: ${edge.label || edge.value})`;
+                const option = new Option(edgeDisplayLabel, edge.id);
+                edgeToDeleteSelect.add(option);
+            });
+            edgeToDeleteSelect.value = visEdges.get(currentValue) ? currentValue : "";
+        }
+
+
+        function addNode() {
+            const nodeId = nodeIdInput.value.trim();
+            if (!nodeId) return showMessage('El ID del nodo no puede estar vacío.', 'error');
+            if (visNodes.get(nodeId)) return showMessage(`El nodo "${nodeId}" ya existe.`, 'error');
+            
+            visNodes.add({ id: nodeId, label: nodeId }); 
+            network.fit({animation: {duration: 500, easingFunction: 'easeInOutQuad'}}); 
+            nodeIdInput.value = ''; 
+            updateAllSelectors();
+            showMessage(`Nodo "${nodeId}" añadido.`, 'success');
+        }
+
+        function addEdge() {
+            const from = edgeFromSelect.value;
+            const to = edgeToSelect.value;
+            const weight = parseInt(edgeWeightInput.value);
+
+            if (!from || !to) return showMessage('Seleccione nodo de origen y destino.', 'error');
+            if (from === to) return showMessage('Origen y destino no pueden ser el mismo.', 'error');
+            if (isNaN(weight) || weight < 0) return showMessage('El peso debe ser un número no negativo.', 'error');
+
+            const existingEdges = visEdges.get({
+                filter: item => (item.from === from && item.to === to) || (item.from === to && item.to === from) 
+            });
+            if (existingEdges.length > 0) return showMessage(`Ya existe un enlace entre "${from}" y "${to}".`, 'error');
+            
+            const edgeId = `edge-${from}-${to}-${Date.now()}`; 
+            visEdges.add({ 
+                id: edgeId, from, to, 
+                label: String(weight), value: weight,
+                active: true, dashes: false,
+                color: { color: DEFAULT_EDGE_COLOR, highlight: DEFAULT_EDGE_HIGHLIGHT_COLOR, hover: DEFAULT_EDGE_HOVER_COLOR }
+            });
+            edgeWeightInput.value = ''; 
+            updateEdgeSelectors(); // Solo actualizar selector de aristas
+            showMessage(`Enlace de "${from}" a "${to}" (peso ${weight}) añadido.`, 'success');
+        }
+
+        function deleteNode() {
+            const nodeIdToDelete = nodeToDeleteSelect.value;
+            if (!nodeIdToDelete) return showMessage('Seleccione un nodo para eliminar.', 'error');
+
+            const edgesToRemove = visEdges.get({
+                filter: edge => edge.from === nodeIdToDelete || edge.to === nodeIdToDelete
+            }).map(edge => edge.id);
+
+            if (edgesToRemove.length > 0) visEdges.remove(edgesToRemove);
+            visNodes.remove(nodeIdToDelete);
+            
+            updateAllSelectors();
+            showMessage(`Nodo "${nodeIdToDelete}" y sus enlaces han sido eliminados.`, 'success');
+            clearDijkstraPathHighlight(); // Limpiar si el nodo era parte de una ruta
+        }
+
+        function deleteEdge() {
+            const edgeIdToDelete = edgeToDeleteSelect.value;
+            if (!edgeIdToDelete) return showMessage('Seleccione un enlace para eliminar.', 'error');
+            
+            const edge = visEdges.get(edgeIdToDelete);
+            visEdges.remove(edgeIdToDelete);
+            updateEdgeSelectors();
+            showMessage(`Enlace eliminado.`, 'success');
+            if (edge && highlightedDijkstraEdges.includes(edge.id)) {
+                 clearDijkstraPathHighlight(); // Limpiar si el enlace era parte de una ruta
+            }
+        }
+        
+        function clearDijkstraPathHighlight() {
+            if (highlightedDijkstraEdges.length > 0) {
+                const updates = [];
+                highlightedDijkstraEdges.forEach(edgeId => {
+                    const edge = visEdges.get(edgeId);
+                    if (edge) { 
+                        updates.push({ 
+                            id: edgeId, 
+                            color: edge.active === false ? { color: INACTIVE_EDGE_COLOR, highlight: INACTIVE_EDGE_COLOR, hover: INACTIVE_EDGE_COLOR } : { color: DEFAULT_EDGE_COLOR, highlight: DEFAULT_EDGE_HIGHLIGHT_COLOR, hover: DEFAULT_EDGE_HOVER_COLOR },
+                            width: options.edges.width 
+                        });
+                    }
+                });
+                if (updates.length > 0) visEdges.update(updates);
+                highlightedDijkstraEdges = [];
+            }
+            const allNodes = visNodes.get({ fields: ['id'] });
+            const nodeUpdates = allNodes.map(node => ({
+                id: node.id,
+                color: { 
+                    border: options.nodes.color.border, 
+                    background: options.nodes.color.background 
+                }
+            }));
+            if (nodeUpdates.length > 0) visNodes.update(nodeUpdates);
+        }
+
+        function dijkstra(startNodeId, endNodeId) {
+            const nodes = visNodes.getIds();
+            const allEdgesData = visEdges.get(); 
+
+            const adj = new Map();
+            nodes.forEach(node => adj.set(node, []));
+            
+            allEdgesData.forEach(edge => {
+                if (edge.active === false) return; 
+                const weight = parseInt(edge.value || edge.label); 
+                if (!isNaN(weight)) {
+                    adj.get(edge.from).push({ node: edge.to, weight: weight, edgeId: edge.id });
+                }
+            });
+
+            const distances = new Map(); 
+            const predecessors = new Map(); 
+            const pq = new vis.DataSet(); 
+
+            nodes.forEach(node => {
+                distances.set(node, Infinity);
+                predecessors.set(node, null);
+                pq.add({ id: node, distance: Infinity });
+            });
+
+            distances.set(startNodeId, 0);
+            pq.update({ id: startNodeId, distance: 0 });
+
+            while (pq.length > 0) {
+                const uItem = pq.min('distance');
+                if (!uItem || uItem.distance === Infinity) break; 
+                const u = uItem.id;
+                pq.remove(u);
+                if (u === endNodeId) break; 
+
+                const neighbors = adj.get(u) || [];
+                for (const neighbor of neighbors) {
+                    const v = neighbor.node;
+                    const weight = neighbor.weight;
+                    const alt = distances.get(u) + weight;
+                    if (alt < (distances.get(v) || Infinity)) {
+                        distances.set(v, alt);
+                        predecessors.set(v, {node: u, edgeId: neighbor.edgeId });
+                        if (pq.get(v)) pq.update({ id: v, distance: alt });
+                    }
+                }
+            }
+
+            const path = [];
+            const pathEdges = [];
+            let current = endNodeId;
+            
+            if (distances.get(endNodeId) === Infinity) return null; 
+
+            while (current && (predecessors.get(current) !== undefined || current === startNodeId)) { 
+                path.unshift(current);
+                const predInfo = predecessors.get(current);
+                if (predInfo && predInfo.node) { 
+                    if (predInfo.edgeId) pathEdges.unshift(predInfo.edgeId);
+                    current = predInfo.node;
+                } else if (current === startNodeId) break; 
+                else return null;
+            }
+            
+            if ((path.length === 0 && startNodeId !== endNodeId) || (path.length > 0 && path[0] !== startNodeId && startNodeId !== endNodeId)) return null;
+            if (path.length === 0 && startNodeId === endNodeId) path.push(startNodeId);
+
+            const totalDistance = distances.get(endNodeId);
+            return (totalDistance === Infinity) ? null : { path, pathEdges, distance: totalDistance };
+        }
+
+        function runDijkstra() {
+            clearDijkstraPathHighlight(); 
+            const startNodeId = startNodeSelect.value;
+            const endNodeId = endNodeSelect.value;
+
+            if (!startNodeId || !endNodeId) return showMessage('Seleccione nodo origen y destino.', 'error');
+            if (startNodeId === endNodeId) {
+                showMessage('Nodo origen y destino son el mismo. Distancia: 0.', 'info');
+                visNodes.update({ id: startNodeId, color: { border: DIJKSTRA_PATH_NODE_BORDER_COLOR, background: DIJKSTRA_PATH_NODE_BG_COLOR } }); 
+                return;
+            }
+
+            const result = dijkstra(startNodeId, endNodeId);
+
+            if (result && result.path.length > 0) {
+                showMessage(`Ruta óptima: ${result.path.join(' → ')}. Costo: ${result.distance}.`, 'success');
+                const nodeUpdates = result.path.map(nodeId => ({
+                    id: nodeId,
+                    color: { border: DIJKSTRA_PATH_NODE_BORDER_COLOR, background: DIJKSTRA_PATH_NODE_BG_COLOR }
+                }));
+                if (nodeUpdates.length > 0) visNodes.update(nodeUpdates);
+                
+                if (result.pathEdges && result.pathEdges.length > 0) {
+                    const edgeUpdates = result.pathEdges.map(edgeId => ({
+                        id: edgeId,
+                        color: { color: DIJKSTRA_PATH_EDGE_COLOR, highlight: DIJKSTRA_PATH_EDGE_COLOR, hover: DIJKSTRA_PATH_EDGE_COLOR }, 
+                        width: 3.5 
+                    }));
+                    if (edgeUpdates.length > 0) visEdges.update(edgeUpdates);
+                    highlightedDijkstraEdges = result.pathEdges; 
+                }
+            } else {
+                showMessage(`No se encontró ruta entre "${startNodeId}" y "${endNodeId}" (considerando enlaces activos).`, 'error');
+            }
+        }
+        
+        function resetGraphVisualization() {
+            clearDijkstraPathHighlight();
+            visNodes.clear();
+            visEdges.clear();
+            updateAllSelectors(); 
+            jsonInput.value = ''; 
+            messageBox.textContent = ''; 
+            messageBox.className = 'mb-6';
+            network.setOptions({ physics: options.physics }); 
+            showMessage('Simulación reiniciada.', 'info');
+        }
+
+        function loadGraphFromJson() {
+            const jsonString = jsonInput.value;
+            if (!jsonString.trim()) return showMessage('El campo JSON está vacío.', 'error');
+
+            try {
+                const graphData = JSON.parse(jsonString);
+                if (typeof graphData !== 'object' || graphData === null) throw new Error("JSON debe ser un objeto.");
+                if (!Array.isArray(graphData.nodes)) throw new Error("'nodes' debe ser un array.");
+                if (graphData.edges && !Array.isArray(graphData.edges)) throw new Error("'edges' debe ser un array si existe.");
+
+                resetGraphVisualization(); 
+
+                const newNodes = [];
+                for (const node of graphData.nodes) {
+                    if (!node.id) throw new Error("Cada nodo JSON debe tener 'id'.");
+                    const nodeProperties = { id: String(node.id), label: node.label || String(node.id) };
+                    if (node.x !== undefined && node.y !== undefined) {
+                        const x = parseInt(node.x), y = parseInt(node.y);
+                        if (!isNaN(x) && !isNaN(y)) {
+                            nodeProperties.x = x; nodeProperties.y = y; nodeProperties.physics = false; 
+                        } else {
+                            showMessage(`Advertencia: Coordenadas inválidas para nodo ${node.id}. Se posicionará por físicas.`, 'info');
+                        }
+                    }
+                    newNodes.push(nodeProperties);
+                }
+                if (newNodes.length > 0) visNodes.add(newNodes);
+
+                if (graphData.edges) {
+                    const newEdges = [];
+                    let edgeCounter = 0; 
+                    for (const edge of graphData.edges) {
+                        if (!edge.from || !edge.to || edge.weight === undefined) throw new Error("Cada arista JSON debe tener 'from', 'to', y 'weight'.");
+                        const weight = parseInt(edge.weight);
+                        if (isNaN(weight) || weight < 0) throw new Error(`Peso inválido para ${edge.from}-${edge.to}.`);
+                        
+                        const isActive = edge.active === undefined ? true : edge.active; 
+                        newEdges.push({
+                            id: edge.id || `jsonEdge-${edge.from}-${edge.to}-${edgeCounter++}`, 
+                            from: String(edge.from), to: String(edge.to),
+                            label: edge.label || String(weight), value: weight,
+                            active: isActive, dashes: !isActive, 
+                            color: isActive ? { color: DEFAULT_EDGE_COLOR, highlight: DEFAULT_EDGE_HIGHLIGHT_COLOR, hover: DEFAULT_EDGE_HOVER_COLOR } : { color: INACTIVE_EDGE_COLOR, highlight: INACTIVE_EDGE_COLOR, hover: INACTIVE_EDGE_COLOR }
+                        });
+                    }
+                    if (newEdges.length > 0) visEdges.add(newEdges);
+                }
+                updateAllSelectors();
+                network.fit({animation: {duration: 800, easingFunction: 'easeInOutQuad'}}); 
+                showMessage('Topología cargada desde JSON.', 'success');
+            } catch (error) {
+                showMessage(`Error al cargar JSON: ${error.message}`, 'error');
+            }
+        }
+
+        network.on("click", function (params) {
+            clearDijkstraPathHighlight(); 
+            if (params.edges.length > 0) { 
+                const edgeId = params.edges[0];
+                const edge = visEdges.get(edgeId);
+                if (edge) {
+                    const newActiveState = !edge.active;
+                    visEdges.update({
+                        id: edgeId, active: newActiveState, dashes: !newActiveState, 
+                        color: newActiveState ? { color: DEFAULT_EDGE_COLOR, highlight: DEFAULT_EDGE_HIGHLIGHT_COLOR, hover: DEFAULT_EDGE_HOVER_COLOR } : { color: INACTIVE_EDGE_COLOR, highlight: INACTIVE_EDGE_COLOR, hover: INACTIVE_EDGE_COLOR }
+                    });
+                    showMessage(`Enlace ${edge.from}–${edge.to} ${newActiveState ? 'ACTIVADO' : 'DESACTIVADO'}.`, 'info');
+                }
+            }
+        });
+
+        // Inicialización
+        updateAllSelectors();
+        showMessage('Bienvenido al Simulador de Redes. Construya su topología o cárguela desde JSON.', 'info');
+    </script>
+</body>
+</html>
