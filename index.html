@@ -46,14 +46,15 @@
 
         #mynetwork {
             width: 100%;
+            max-width: 900px;
             height: 450px; /* Ajustado ligeramente */
             border: 2px solid var(--olivine-200); 
             background-color: #ffffff;
             border-radius: 0.75rem; 
             box-shadow: 0 6px 10px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
         }
-        
-        .main-controls-panel, .project-info-panel {
+         .main-controls-panel, .project-info-panel {
             background-color: #ffffff;
             padding: 0; 
             border-radius: 0.75rem;
@@ -74,35 +75,38 @@
             border-bottom: 2px solid var(--olivine-100); 
         }
 
-
         .tab-buttons {
             display: flex;
-            flex-wrap: wrap; 
+            flex-wrap: wrap;
             border-bottom: 2px solid var(--olivine-200);
             background-color: white;
             border-top-left-radius: 0.75rem;
             border-top-right-radius: 0.75rem;
+            overflow: hidden;
         }
         .tab-button {
-            padding: 0.75rem 1.25rem;
-            cursor: pointer;
-            border: none;
-            background-color: transparent;
-            color: var(--olivine-600);
-            font-weight: 500;
-            transition: all 0.2s ease-in-out;
-            border-bottom: 3px solid transparent; 
-            flex-grow: 1; 
+            flex: 1 1 0;
             text-align: center;
-        }
-        .tab-button:hover {
-            background-color: var(--olivine-100);
+            padding: 1rem 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            background: transparent;
+            border: none;
+            border-radius: 0.75rem 0.75rem 0 0;
             color: var(--olivine-700);
+            transition: background 0.18s, color 0.18s, border-bottom 0.18s;
+            margin-bottom: -2px;
+            cursor: pointer;
         }
         .tab-button.active {
+            background: #f6faf3;
+            color: var(--olivine-900);
+            border-bottom: 4px solid var(--olivine-500);
+            z-index: 2;
+        }
+        .tab-button:not(.active):hover {
+            background: var(--olivine-100);
             color: var(--olivine-700);
-            border-bottom-color: var(--olivine-500);
-            font-weight: 600;
         }
         .tab-content {
             padding: 1.5rem; 
@@ -135,31 +139,83 @@
             border-color: var(--olivine-100);
         }
 
-
-        button, input[type="button"] {
-            transition: all 0.2s ease-in-out; 
-            border-radius: 0.375rem; 
-            padding: 0.625rem 1.25rem; 
-            font-weight: 500; 
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            border: none; 
+        /* Sub-tarjetas/secciones dentro de cada menú */
+        .subcard {
+            background: var(--olivine-50);
+            border: 1px solid var(--olivine-200);
+            border-radius: 0.5rem;
+            padding: 1.1rem 1.2rem 1.1rem 1.2rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 1px 2px 0 rgba(98,156,75,0.04);
         }
-        button:hover, input[type="button"]:hover {
-            transform: translateY(-1px);
+        .subcard:last-child {
+            margin-bottom: 0;
+        }
+        .subcard h4 {
+            margin-top: 0;
+        }
+        .subcard hr {
+            margin: 1rem 0;
+        }
+        /* Layout paralelo para nodos y enlaces en PC */
+        .node-section-row, .edge-section-row {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+        @media (min-width: 900px) {
+            .node-section-row, .edge-section-row {
+                flex-direction: row;
+            }
+            .node-section-row .subcard, .edge-section-row .subcard {
+                flex: 1 1 0;
+                margin-bottom: 0;
+            }
+        }
+
+        /* Tarjetas principales para nodos y enlaces */
+        .main-card {
+            background: #fff;
+            border-radius: 0.85rem;
+            box-shadow: 0 4px 16px 0 rgba(98,156,75,0.08);
+            border: 1.5px solid var(--olivine-200);
+            margin-bottom: 2rem;
+            padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+        }
+        .main-card h3 {
+            color: var(--olivine-700);
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+        }
+        /* Botones modernos y centrados */
+        button, input[type="button"] {
+            border-radius: 0.5rem;
+            padding: 2rem 2.2rem;
+            font-weight: 500;
+            margin: 0.5rem 0 0.5rem 0;
+            display: block;
+            width: 100%;
+            box-shadow: 0 2px 8px 0 rgba(98,156,75,0.08);
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.18s;
         }
         .btn-primary {
-            background-color: var(--olivine-500); 
+            background-color: var(--olivine-500);
             color: white;
         }
         .btn-primary:hover {
-            background-color: var(--olivine-600); 
+            background-color: var(--olivine-600);
+            box-shadow: 0 4px 16px 0 rgba(98,156,75,0.13);
+            transform: translateY(-2px) scale(1.03);
         }
         .btn-danger {
-            background-color: #e11d48; 
+            background-color: #e11d48;
             color: white;
         }
         .btn-danger:hover {
-            background-color: #be123c; 
+            background-color: #be123c;
+            box-shadow: 0 4px 16px 0 rgba(225,29,72,0.13);
+            transform: translateY(-2px) scale(1.03);
         }
 
         #messageBox {
@@ -272,95 +328,155 @@
         <div class="tab-buttons">
             <button class="tab-button active" data-tab="tabEdit" onclick="openTab(event, 'tabEdit')">Editar Red</button>
             <button class="tab-button" data-tab="tabSimulate" onclick="openTab(event, 'tabSimulate')">Simular y Analizar</button>
-            <button class="tab-button" data-tab="tabData" onclick="openTab(event, 'tabData')">Datos y Control</button>
+            <button class="tab-button" data-tab="tabData" onclick="openTab(event, 'tabData')">Carga masiva</button>
             <button class="tab-button" data-tab="tabInstructions" onclick="openTab(event, 'tabInstructions')">Instrucciones</button>
         </div>
 
         <div id="tabEdit" class="tab-pane active">
             <div class="tab-content control-group">
-                <h4>Añadir Nodo</h4>
-                <div class="space-y-3">
-                    <div>
-                        <label for="node-id">ID del Nodo:</label>
-                        <input type="text" id="node-id" placeholder="Ej: RouterA, ServidorPrincipal">
+                <div class="main-card">
+                    <h3>Gestión de Nodos</h3>
+                    <div class="node-section-row">
+                        <div class="subcard">
+                            <h4>Añadir Nodo</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label for="node-id">ID del Nodo:</label>
+                                    <input type="text" id="node-id" placeholder="Ej: RouterA, ServidorPrincipal">
+                                </div>
+                                <button onclick="addNode()" class="btn-primary">Añadir Nodo</button>
+                            </div>
+                        </div>
+                        <div class="subcard">
+                            <h4>Eliminar Nodo</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label for="node-to-delete">Seleccionar Nodo para Eliminar:</label>
+                                    <select id="node-to-delete"><option value="">Seleccionar nodo a eliminar</option></select>
+                                </div>
+                                <button onclick="deleteNode()" class="btn-danger">Eliminar Nodo</button>
+                            </div>
+                        </div>
                     </div>
-                    <button onclick="addNode()" class="w-full btn-primary">Añadir Nodo</button>
                 </div>
-                <hr>
-                <h4>Añadir Enlace</h4>
-                <div class="space-y-3">
-                    <div>
-                        <label for="edge-from">Desde (Nodo Origen):</label>
-                        <select id="edge-from"><option value="">Seleccionar nodo de origen</option></select>
+                <div class="main-card">
+                    <h3>Gestión de Enlaces</h3>
+                    <div class="edge-section-row">
+                        <div class="subcard">
+                            <h4>Añadir Enlace</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label for="edge-from">Desde (Nodo Origen):</label>
+                                    <select id="edge-from"><option value="">Seleccionar nodo de origen</option></select>
+                                </div>
+                                <div>
+                                    <label for="edge-to">Hasta (Nodo Destino):</label>
+                                    <select id="edge-to"><option value="">Seleccionar nodo de destino</option></select>
+                                </div>
+                                <div>
+                                    <label for="edge-type">Tipo de Enlace:</label>
+                                    <select id="edge-type">
+                                        <option value="undirected">No dirigido</option>
+                                        <option value="directed">Dirigido</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="edge-weight">Peso (Latencia/Costo):</label>
+                                    <input type="number" id="edge-weight" placeholder="Ej: 5" min="0">
+                                </div>
+                                <button onclick="addEdge()" class="btn-primary">Añadir Enlace</button>
+                            </div>
+                        </div>
+                        <div class="subcard">
+                            <h4>Eliminar Enlace</h4>
+                            <div class="space-y-3 mt-4">
+                                <div>
+                                    <label for="edge-to-delete">Seleccionar Enlace para Eliminar:</label>
+                                    <select id="edge-to-delete"><option value="">Seleccionar enlace a eliminar</option></select>
+                                </div>
+                                <button onclick="deleteEdge()" class="btn-danger">Eliminar Enlace</button>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label for="edge-to">Hasta (Nodo Destino):</label>
-                        <select id="edge-to"><option value="">Seleccionar nodo de destino</option></select>
-                    </div>
-                    <div>
-                        <label for="edge-weight">Peso (Latencia/Costo):</label>
-                        <input type="number" id="edge-weight" placeholder="Ej: 5" min="0">
-                    </div>
-                    <button onclick="addEdge()" class="w-full btn-primary">Añadir Enlace</button>
                 </div>
-                <hr>
-                <h4>Eliminar Elementos</h4>
-                <div class="space-y-3">
-                    <div>
-                        <label for="node-to-delete">Seleccionar Nodo para Eliminar:</label>
-                        <select id="node-to-delete"><option value="">Seleccionar nodo a eliminar</option></select>
+                <div class="main-card">
+                    <h3>Control General de la Simulación</h3>
+                    <div class="subcard">
+                        <button onclick="resetGraphVisualization()" class="btn-danger">
+                            Reiniciar Simulación Completa
+                        </button>
                     </div>
-                    <button onclick="deleteNode()" class="w-full btn-danger">Eliminar Nodo</button>
-                </div>
-                <div class="space-y-3 mt-4">
-                    <div>
-                        <label for="edge-to-delete">Seleccionar Enlace para Eliminar:</label>
-                        <select id="edge-to-delete"><option value="">Seleccionar enlace a eliminar</option></select>
-                    </div>
-                    <button onclick="deleteEdge()" class="w-full btn-danger">Eliminar Enlace</button>
                 </div>
             </div>
         </div>
 
         <div id="tabSimulate" class="tab-pane">
             <div class="tab-content control-group">
-                <h4>Simulación de Caída de Enlaces</h4>
-                <p class="text-sm mb-4" style="color: var(--olivine-600);">
-                    Para simular que un enlace de red (arista) se ha caído o para reactivarlo, simplemente <strong>haga clic sobre la arista</strong> directamente en el grafo.
-                </p>
-                <hr>
-                <h4>Análisis de Ruta con Dijkstra</h4>
-                <div class="space-y-3">
-                    <div>
-                        <label for="start-node">Nodo Origen para Dijkstra:</label>
-                        <select id="start-node"><option value="">Seleccionar nodo de origen</option></select>
-                    </div>
-                    <div>
-                        <label for="end-node">Nodo Destino para Dijkstra:</label>
-                        <select id="end-node"><option value="">Seleccionar nodo de destino</option></select>
-                    </div>
-                    <button onclick="runDijkstra()" class="w-full btn-primary">Calcular Ruta Óptima</button>
-                    <div id="pathSelectorContainer" class="mt-4 space-y-2" style="display: none;">
+                <div class="subcard">
+                    <h4>Simulación de Caída de Enlaces</h4>
+                    <p class="text-sm mb-4" style="color: var(--olivine-600);">
+                        Para simular que un enlace de red (arista) se ha caído o para reactivarlo, simplemente <strong>haga clic sobre la arista</strong> directamente en el grafo.
+                    </p>
+                </div>
+                <div class="subcard">
+                    <h4>Análisis de Ruta con Dijkstra</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="start-node">Nodo Origen para Dijkstra:</label>
+                            <select id="start-node"><option value="">Seleccionar nodo de origen</option></select>
                         </div>
+                        <div>
+                            <label for="end-node">Nodo Destino para Dijkstra:</label>
+                            <select id="end-node"><option value="">Seleccionar nodo de destino</option></select>
+                        </div>
+                        <button onclick="runDijkstra()" class="w-full btn-primary">Calcular Ruta Óptima</button>
+                        <div id="pathSelectorContainer" class="mt-4 space-y-2" style="display: none;">
+                            </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div id="tabData" class="tab-pane">
             <div class="tab-content control-group">
-                <h4>Cargar Topología desde JSON</h4>
-                <div class="space-y-3">
-                    <div>
-                        <label for="json-input">Dentro de un mundo de inteligencia artificial, hemos decidido que por limitaciones no podemos usar una API, implementemaos esta sección que permite crear grafos desde un formato JSON, para que le pases una foto del grafo que quieres, junto con las instrucciones, y te genere el grafo en formato JSON.</label>
-                        <textarea id="json-input" rows="10" placeholder="Consulte la pestaña 'Instrucciones' para el formato JSON."></textarea>
+                <div class="subcard">
+                    <h4>Cargar Topología desde JSON</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label for="json-input">Puedes crear cualquier tipo de grafo (dirigido, no dirigido o mixto) usando el siguiente formato JSON. Consulta las instrucciones y copia el ejemplo si lo necesitas.</label>
+                            <textarea id="json-input" rows="10" placeholder="Pega aquí tu JSON de grafo..."></textarea>
+                        </div>
+                        <button onclick="loadGraphFromJson()" class="btn-primary">Cargar Topología JSON</button>
                     </div>
-                    <button onclick="loadGraphFromJson()" class="w-full btn-primary">Cargar Topología JSON</button>
                 </div>
-                <hr>
-                <h4>Control General de la Simulación</h4>
-                <button onclick="resetGraphVisualization()" class="w-full btn-danger">
-                    Reiniciar Simulación Completa
-                </button>
+                <div class="subcard">
+                    <h4>Instrucciones y ejemplo de JSON</h4>
+                    <button id="copy-json-instructions" class="btn-primary" style="margin-top: 0.7rem; margin-bottom: 0.7rem;">Copiar instrucciones JSON</button>
+                    <div class="json-example" id="json-instructions-block">
+                        <pre id="json-example-pre">{
+  "nodes": [
+    { "id": "A", "label": "Nodo A", "x": 0, "y": 0 },
+    { "id": "B", "label": "Nodo B", "x": 150, "y": 100 },
+    { "id": "C", "label": "Nodo C" }
+  ],
+  "edges": [
+    { "from": "A", "to": "B", "weight": 3, "directed": false },
+    { "from": "B", "to": "C", "weight": 2, "directed": true },
+    { "from": "C", "to": "A", "weight": 1 }
+  ]
+}
+</pre>
+                    </div>
+                    <ul class="list-disc list-inside mt-3 text-sm space-y-1" id="json-instructions-list" style="color: var(--neutral-label);">
+                        <li><b>"nodes"</b>: Array de objetos nodo. Cada nodo debe tener al menos <code>id</code> (único). Opcionalmente puede tener <code>label</code> (nombre mostrado), <code>x</code> y <code>y</code> (posición inicial).</li>
+                        <li><b>"edges"</b>: Array de objetos enlace. Cada enlace debe tener <code>from</code> (nodo origen), <code>to</code> (nodo destino) y <code>weight</code> (peso/costo).</li>
+                        <li>Para un <b>enlace dirigido</b> (flecha de <code>from</code> a <code>to</code>), usa <code>"directed": true</code> o simplemente omite el campo (por defecto es dirigido).</li>
+                        <li>Para un <b>enlace no dirigido</b> (sin flecha, conecta ambos nodos en ambos sentidos), usa <code>"directed": false</code>.</li>
+                        <li>Puedes mezclar enlaces dirigidos y no dirigidos en el mismo grafo (grafo mixto).</li>
+                        <li>No repitas enlaces opuestos para no dirigidos: basta con uno con <code>"directed": false</code>.</li>
+                        <li>Ejemplo de grafo mixto: A—B (no dirigido), B→C (dirigido), C→A (dirigido).</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -383,27 +499,51 @@
 
                 <h4 class="text-md font-semibold mt-4 mb-1" style="color: var(--olivine-700);">Carga Masiva con JSON:</h4>
                 <p class="text-sm mb-2" style="color: var(--neutral-label);">
-                    Formato JSON esperado (reemplaza el grafo actual):
+                    Puedes crear cualquier tipo de grafo (dirigido, no dirigido o mixto) usando el siguiente formato JSON. <br>
+                    <button id="copy-json-instructions" class="btn-primary" style="margin-top: 0.7rem; margin-bottom: 0.7rem;">Copiar instrucciones JSON</button>
                 </p>
-                <div class="json-example">
-                    <pre>
-{
+                <div class="json-example" id="json-instructions-block">
+                    <pre id="json-example-pre">{
   "nodes": [
-    { "id": "R1", "label": "Router Central", "x": 0, "y": 0 },
-    { "id": "S1", "label": "Switch A", "x": 150, "y": 100 }
+    { "id": "A", "label": "Nodo A", "x": 0, "y": 0 },
+    { "id": "B", "label": "Nodo B", "x": 150, "y": 100 },
+    { "id": "C", "label": "Nodo C" }
   ],
   "edges": [
-    { "from": "R1", "to": "S1", "weight": 1 },
-    { "from": "S1", "to": "R1", "weight": 1, "label": "Retorno S1-R1" },
-    { "from": "R1", "to": "R1", "weight": 5, "label": "Bucle en R1" }
+    { "from": "A", "to": "B", "weight": 3, "directed": false },
+    { "from": "B", "to": "C", "weight": 2, "directed": true },
+    { "from": "C", "to": "A", "weight": 1 }
   ]
 }
-                    </pre>
+</pre>
                 </div>
-                <ul class="list-disc list-inside mt-3 text-sm space-y-1" style="color: var(--neutral-label);">
-                    <li><code>"nodes"</code>: Array de objetos nodo (<code>id</code> obligatorio; <code>label</code>, <code>x</code>, <code>y</code> opcionales).</li>
-                    <li><code>"edges"</code>: Array de objetos enlace (<code>from</code>, <code>to</code>, <code>weight</code> obligatorios; <code>label</code>, <code>active</code> opcionales).</li>
+                <ul class="list-disc list-inside mt-3 text-sm space-y-1" id="json-instructions-list" style="color: var(--neutral-label);">
+                    <li><b>"nodes"</b>: Array de objetos nodo. Cada nodo debe tener al menos <code>id</code> (único). Opcionalmente puede tener <code>label</code> (nombre mostrado), <code>x</code> y <code>y</code> (posición inicial).</li>
+                    <li><b>"edges"</b>: Array de objetos enlace. Cada enlace debe tener <code>from</code> (nodo origen), <code>to</code> (nodo destino) y <code>weight</code> (peso/costo).</li>
+                    <li>Para un <b>enlace dirigido</b> (flecha de <code>from</code> a <code>to</code>), usa <code>"directed": true</code> o simplemente omite el campo (por defecto es dirigido).</li>
+                    <li>Para un <b>enlace no dirigido</b> (sin flecha, conecta ambos nodos en ambos sentidos), usa <code>"directed": false</code>.</li>
+                    <li>Puedes mezclar enlaces dirigidos y no dirigidos en el mismo grafo (grafo mixto).</li>
+                    <li>No repitas enlaces opuestos para no dirigidos: basta con uno con <code>"directed": false</code>.</li>
+                    <li>Ejemplo de grafo mixto: A—B (no dirigido), B→C (dirigido), C→A (dirigido).</li>
                 </ul>
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                  const btn = document.getElementById('copy-json-instructions');
+                  const block = document.getElementById('json-instructions-block');
+                  const pre = document.getElementById('json-example-pre');
+                  const list = document.getElementById('json-instructions-list');
+                  if(btn && block && pre && list) {
+                    btn.onclick = function() {
+                      let text = 'INSTRUCCIONES PARA CREAR GRAFOS EN FORMATO JSON:\n';
+                      text += list.innerText + '\n\nEJEMPLO DE JSON:\n';
+                      text += pre.innerText || pre.textContent;
+                      navigator.clipboard.writeText(text);
+                      btn.textContent = '¡Copiado!';
+                      setTimeout(()=>{btn.textContent = 'Copiar instrucciones JSON';}, 1800);
+                    };
+                  }
+                });
+                </script>
             </div>
         </div>
     </div>
@@ -605,6 +745,7 @@
             const from = edgeFromSelect.value;
             const to = edgeToSelect.value;
             const weight = parseInt(edgeWeightInput.value);
+            const edgeType = document.getElementById('edge-type').value;
 
             if (!from || !to) return showMessage('Seleccione nodo de origen y destino.', 'error');
             if (isNaN(weight) || weight < 0) return showMessage('El peso debe ser un número no negativo.', 'error');
@@ -619,20 +760,30 @@
                     return showMessage(`Ya existe un enlace de "${from}" a "${to}".`, 'error');
                  }
             }
-            
+            // Para bidireccional, solo una arista con flechas en ambos extremos
             const edgeId = `edge-${from}-${to}-${Date.now()}`; 
+            let arrowsOption;
+            if (edgeType === 'bidirectional' && from !== to) {
+                arrowsOption = { to: { enabled: true, scaleFactor: 0.7 }, from: { enabled: true, scaleFactor: 0.7 } };
+            } else if (edgeType === 'directional') {
+                arrowsOption = { to: { enabled: true, scaleFactor: 0.7 } };
+            } else {
+                arrowsOption = { to: { enabled: false } };
+            }
             visEdges.add({ 
                 id: edgeId, from, to, 
                 label: String(weight), value: weight,
                 active: true, dashes: false,
+                arrows: arrowsOption,
                 color: { color: OLIVINE_DEFAULT_EDGE_COLOR, highlight: OLIVINE_DEFAULT_EDGE_HIGHLIGHT_COLOR, hover: OLIVINE_DEFAULT_EDGE_HOVER_COLOR }
             });
+
             edgeWeightInput.value = ''; 
             updateEdgeSelectors(); 
             if (from === to) {
                 showMessage(`Bucle añadido en "${from}" con peso ${weight}.`, 'success');
             } else {
-                showMessage(`Enlace de "${from}" a "${to}" (peso ${weight}) añadido.`, 'success');
+                showMessage(`Enlace ${edgeType === 'bidirectional' ? 'bidireccional' : 'direccional'} de "${from}" a "${to}" (peso ${weight}) añadido.`, 'success');
             }
         }
 
@@ -919,13 +1070,19 @@
                         if (!edge.from || !edge.to || edge.weight === undefined) throw new Error("Cada arista JSON debe tener 'from', 'to', y 'weight'.");
                         const weight = parseInt(edge.weight);
                         if (isNaN(weight) || weight < 0) throw new Error(`Peso inválido para ${edge.from}-${edge.to}.`);
-                        
                         const isActive = edge.active === undefined ? true : edge.active; 
+                        let arrowsOption;
+                        if (edge.bidirectional && edge.from !== edge.to) {
+                            arrowsOption = { to: { enabled: true, scaleFactor: 0.7 }, from: { enabled: true, scaleFactor: 0.7 } };
+                        } else {
+                            arrowsOption = { to: { enabled: true, scaleFactor: 0.7 } };
+                        }
                         newEdges.push({
                             id: edge.id || `jsonEdge-${edge.from}-${edge.to}-${edgeCounter++}`, 
                             from: String(edge.from), to: String(edge.to),
                             label: edge.label || String(weight), value: weight,
                             active: isActive, dashes: !isActive, 
+                            arrows: arrowsOption,
                             color: isActive ? { color: OLIVINE_DEFAULT_EDGE_COLOR, highlight: OLIVINE_DEFAULT_EDGE_HIGHLIGHT_COLOR, hover: OLIVINE_DEFAULT_EDGE_HOVER_COLOR } : { color: OLIVINE_INACTIVE_EDGE_COLOR, highlight: OLIVINE_INACTIVE_EDGE_COLOR, hover: OLIVINE_INACTIVE_EDGE_COLOR }
                         });
                     }
