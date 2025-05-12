@@ -53,6 +53,51 @@
             border-radius: 0.75rem; 
             box-shadow: 0 6px 10px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             margin-bottom: 1.5rem;
+            position: relative;
+        }
+        #mynetwork.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            margin: 0;
+            border-radius: 0;
+            z-index: 9999;
+        }
+        .fullscreen-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--olivine-500);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10000;
+            transition: background-color 0.2s;
+        }
+        #download-btn {
+            right: 70px;
+        }
+        .fullscreen-button:hover {
+            background: var(--olivine-600);
+        }
+        .fullscreen-button svg {
+            width: 20px;
+            height: 20px;
+        }
+        /* Botón en modo fullscreen */
+        #mynetwork.fullscreen ~ #fullscreen-btn {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
         }
          .main-controls-panel, .project-info-panel {
             background-color: #ffffff;
@@ -321,7 +366,19 @@
     <h1 class="text-3xl md:text-4xl font-bold text-center page-title">Simulador Avanzado de Topologías de Red</h1>
     <p class="text-xl text-center page-subtitle">Proyecto Final Matemáticas Discretas</p>
 
-    <div id="mynetwork" class="mb-6"></div>
+    <div style="position: relative; width: 100%; max-width: 900px; margin: 0 auto;">
+        <div id="mynetwork" class="mb-6"></div>
+        <button id="fullscreen-btn" class="fullscreen-button" onclick="toggleFullscreen()" title="Alternar pantalla completa">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+            </svg>
+        </button>
+        <button id="download-btn" class="fullscreen-button" style="right: 70px;" onclick="downloadGraphImage()" title="Descargar imagen del grafo">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+            </svg>
+        </button>
+    </div>
     <div id="messageBox"></div>
 
     <div class="main-controls-panel">
@@ -873,10 +930,12 @@
                 const u = uItem.id;
                 pq.remove(u);
 
-                const neighbors = allEdgesData.filter(edge => edge.from === u && edge.active !== false);
+                const neighbors = allEdgesData.filter(edge => 
+                    (edge.from === u || edge.to === u) && edge.active !== false
+                );
                 
                 for (const neighborEdge of neighbors) {
-                    const v = neighborEdge.to;
+                    const v = neighborEdge.from === u ? neighborEdge.to : neighborEdge.from;
                     const weight = parseInt(neighborEdge.value || neighborEdge.label);
                     if (isNaN(weight)) continue;
                     const alt = distances.get(u) + weight;
@@ -1072,8 +1131,8 @@
                         if (isNaN(weight) || weight < 0) throw new Error(`Peso inválido para ${edge.from}-${edge.to}.`);
                         const isActive = edge.active === undefined ? true : edge.active; 
                         let arrowsOption;
-                        if (edge.bidirectional && edge.from !== edge.to) {
-                            arrowsOption = { to: { enabled: true, scaleFactor: 0.7 }, from: { enabled: true, scaleFactor: 0.7 } };
+                        if (edge.directed === false) {
+                            arrowsOption = { to: { enabled: false } };
                         } else {
                             arrowsOption = { to: { enabled: true, scaleFactor: 0.7 } };
                         }
@@ -1111,6 +1170,65 @@
                 }
             }
         });
+
+        function toggleFullscreen() {
+            const networkContainer = document.getElementById('mynetwork');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const isFullscreen = networkContainer.classList.contains('fullscreen');
+            
+            if (!isFullscreen) {
+                networkContainer.classList.add('fullscreen');
+                fullscreenBtn.style.position = 'fixed';
+                fullscreenBtn.style.top = '20px';
+                fullscreenBtn.style.right = '20px';
+                fullscreenBtn.style.zIndex = '10000';
+                downloadBtn.style.position = 'fixed';
+                downloadBtn.style.top = '20px';
+                downloadBtn.style.right = '70px';
+                downloadBtn.style.zIndex = '10000';
+                network.redraw();
+                network.fit();
+            } else {
+                networkContainer.classList.remove('fullscreen');
+                fullscreenBtn.style.position = 'absolute';
+                fullscreenBtn.style.top = '20px';
+                fullscreenBtn.style.right = '20px';
+                fullscreenBtn.style.zIndex = '10000';
+                downloadBtn.style.position = 'absolute';
+                downloadBtn.style.top = '20px';
+                downloadBtn.style.right = '70px';
+                downloadBtn.style.zIndex = '10000';
+                network.redraw();
+                network.fit();
+            }
+        }
+
+        // Añadir soporte para la tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const networkContainer = document.getElementById('mynetwork');
+                if (networkContainer.classList.contains('fullscreen')) {
+                    toggleFullscreen();
+                }
+            }
+        });
+
+        function downloadGraphImage() {
+            // Obtener el canvas real de vis-network
+            const canvas = document.querySelector('#mynetwork canvas');
+            if (!canvas) {
+                alert('No se pudo obtener la imagen del grafo.');
+                return;
+            }
+            // Crear un enlace de descarga
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'grafo.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     </script>
 </body>
 </html>
