@@ -927,7 +927,7 @@
         }
 
 
-        function dijkstraAlgorithm(startNodeId) {
+"        function dijkstraAlgorithm(startNodeId) {
             const nodes = visNodes.getIds();
             const allEdgesData = visEdges.get(); 
             const distances = new Map(); 
@@ -1274,27 +1274,40 @@
         function copyJsonExample1() {
             const example1 = {
                 "nodes": [
-                    { "id": "A", "label": "Nodo A" },
-                    { "id": "B", "label": "Nodo B" },
-                    { "id": "C", "label": "Nodo C" },
-                    { "id": "D", "label": "Nodo D" },
-                    { "id": "E", "label": "Nodo E" },
-                    { "id": "F", "label": "Nodo F" },
-                    { "id": "G", "label": "Nodo G" },
-                    { "id": "H", "label": "Nodo H" }
+                    { "id": "a", "label": "a" },
+                    { "id": "b", "label": "b" },
+                    { "id": "c", "label": "c" },
+                    { "id": "d", "label": "d" },
+                    { "id": "e", "label": "e" },
+                    { "id": "f", "label": "f" },
+                    { "id": "g", "label": "g" },
+                    { "id": "h", "label": "h" },
+                    { "id": "i", "label": "i" },
+                    { "id": "j", "label": "j" },
+                    { "id": "z", "label": "z" }
                 ],
                 "edges": [
-                    { "from": "A", "to": "C", "weight": 1, "directed": false },
-                    { "from": "A", "to": "B", "weight": 3, "directed": false },
-                    { "from": "B", "to": "G", "weight": 5, "directed": false },
-                    { "from": "B", "to": "D", "weight": 1, "directed": false },
-                    { "from": "C", "to": "F", "weight": 5, "directed": false },
-                    { "from": "C", "to": "D", "weight": 2, "directed": false },
-                    { "from": "D", "to": "F", "weight": 2, "directed": false },
-                    { "from": "D", "to": "E", "weight": 4, "directed": false },
-                    { "from": "E", "to": "G", "weight": 2, "directed": false },
-                    { "from": "E", "to": "H", "weight": 1, "directed": false },
-                    { "from": "F", "to": "H", "weight": 3, "directed": false }
+                    { "from": "a", "to": "b", "weight": 3, "directed": false },
+                    { "from": "a", "to": "e", "weight": 5, "directed": false },
+                    { "from": "a", "to": "h", "weight": 4, "directed": false },
+                    { "from": "b", "to": "c", "weight": 2, "directed": false },
+                    { "from": "b", "to": "e", "weight": 5, "directed": false },
+                    { "from": "b", "to": "f", "weight": 7, "directed": false },
+                    { "from": "c", "to": "d", "weight": 3, "directed": false },
+                    { "from": "c", "to": "f", "weight": 2, "directed": false },
+                    { "from": "c", "to": "g", "weight": 6, "directed": false },
+                    { "from": "d", "to": "g", "weight": 7, "directed": false },
+                    { "from": "d", "to": "z", "weight": 2, "directed": false },
+                    { "from": "e", "to": "f", "weight": 4, "directed": false },
+                    { "from": "e", "to": "h", "weight": 7, "directed": false },
+                    { "from": "f", "to": "g", "weight": 7, "directed": false },
+                    { "from": "f", "to": "i", "weight": 5, "directed": false },
+                    { "from": "f", "to": "j", "weight": 3, "directed": false },
+                    { "from": "g", "to": "j", "weight": 4, "directed": false },
+                    { "from": "g", "to": "z", "weight": 6, "directed": false },
+                    { "from": "h", "to": "i", "weight": 2, "directed": false },
+                    { "from": "i", "to": "j", "weight": 6, "directed": false },
+                    { "from": "j", "to": "z", "weight": 5, "directed": false }
                 ]
             };
             navigator.clipboard.writeText(JSON.stringify(example1, null, 2));
