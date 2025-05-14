@@ -497,6 +497,13 @@
         <div id="tabData" class="tab-pane">
             <div class="tab-content control-group">
                 <div class="subcard">
+                    <h4>Ejemplos de Topologías</h4>
+                    <div class="space-y-3">
+                        <button id="copy-json-example1" class="btn-primary" onclick="copyJsonExample1()">Copiar Ejemplo 1 - Grafo No Dirigido Simple</button>
+                        <button id="copy-json-example2" class="btn-primary" onclick="copyJsonExample2()">Copiar Ejemplo 2 - Red de Computadoras</button>
+                    </div>
+                </div>
+                <div class="subcard">
                     <h4>Cargar Topología desde JSON</h4>
                     <div class="space-y-3">
                         <div>
@@ -674,10 +681,23 @@
                 borderWidth: 2.5,
             },
             physics: {
-                enabled: true, 
-                solver: 'barnesHut', 
-                barnesHut: { gravitationalConstant: -10000, centralGravity: 0.1, springLength: 120, springConstant: 0.04, damping: 0.09, avoidOverlap: 0.25 },
-                stabilization: { iterations: 2000, fit: true }
+                enabled: true,
+                solver: 'barnesHut',
+                barnesHut: {
+                    gravitationalConstant: -2000,
+                    centralGravity: 0.3,
+                    springLength: 150,
+                    springConstant: 0.08,
+                    damping: 0.4,
+                    avoidOverlap: 0.5
+                },
+                stabilization: {
+                    enabled: true,
+                    iterations: 1000,
+                    updateInterval: 50,
+                    onlyDynamicEdges: false,
+                    fit: true
+                }
             },
             interaction: { hover: true, tooltipDelay: 150, dragNodes: true, dragView: true, zoomView: true, multiselect: false }
         };
@@ -688,6 +708,13 @@
 
 
         const nodeIdInput = document.getElementById('node-id');
+        // Añadir nodo al presionar Enter
+        nodeIdInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevenir el comportamiento por defecto
+                addNode();
+            }
+        });
         const edgeFromSelect = document.getElementById('edge-from');
         const edgeToSelect = document.getElementById('edge-to');
         const edgeWeightInput = document.getElementById('edge-weight');
@@ -1099,7 +1126,30 @@
             if (!jsonString.trim()) return showMessage('El campo JSON está vacío.', 'error');
 
             try {
-                const graphData = JSON.parse(jsonString);
+                // Intentar pre-procesar el JSON para detectar errores comunes
+                let cleanJsonString = jsonString
+                    .replace(/[\u200B-\u200D\uFEFF]/g, '') // Eliminar caracteres invisibles
+                    .replace(/,(\s*[}\]])/g, '$1') // Eliminar comas finales
+                    .trim();
+
+                let graphData;
+                try {
+                    graphData = JSON.parse(cleanJsonString);
+                } catch (parseError) {
+                    // Si falla, intentar con una limpieza más agresiva
+                    cleanJsonString = cleanJsonString
+                        .replace(/,\s*}/g, '}') // Eliminar comas antes de }
+                        .replace(/,\s*]/g, ']') // Eliminar comas antes de ]
+                        .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":') // Asegurar que las claves tengan comillas dobles
+                        .replace(/:\s*(['"])?([a-zA-Z0-9_]+)(['"])?\s*(,|}|])/g, ':"$2"$4'); // Asegurar que los valores string tengan comillas dobles
+                    
+                    try {
+                        graphData = JSON.parse(cleanJsonString);
+                    } catch (finalError) {
+                        throw new Error("JSON inválido. Por favor, verifica el formato y las comillas.");
+                    }
+                }
+                
                 if (typeof graphData !== 'object' || graphData === null) throw new Error("JSON debe ser un objeto.");
                 if (!Array.isArray(graphData.nodes)) throw new Error("'nodes' debe ser un array.");
                 if (graphData.edges && !Array.isArray(graphData.edges)) throw new Error("'edges' debe ser un array si existe.");
@@ -1114,8 +1164,6 @@
                         const x = parseInt(node.x), y = parseInt(node.y);
                         if (!isNaN(x) && !isNaN(y)) {
                             nodeProperties.x = x; nodeProperties.y = y; nodeProperties.physics = false; 
-                        } else {
-                            showMessage(`Advertencia: Coordenadas inválidas para nodo ${node.id}. Se posicionará por físicas.`, 'info');
                         }
                     }
                     newNodes.push(nodeProperties);
@@ -1151,6 +1199,7 @@
                 network.fit({animation: {duration: 800, easingFunction: 'easeInOutQuad'}}); 
                 showMessage('Topología cargada desde JSON.', 'success');
             } catch (error) {
+                console.error('Error completo:', error);
                 showMessage(`Error al cargar JSON: ${error.message}`, 'error');
             }
         }
@@ -1228,6 +1277,108 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        function copyJsonExample1() {
+            const example1 = {
+                "nodes": [
+                    { "id": "A", "label": "Nodo A" },
+                    { "id": "B", "label": "Nodo B" },
+                    { "id": "C", "label": "Nodo C" },
+                    { "id": "D", "label": "Nodo D" },
+                    { "id": "E", "label": "Nodo E" },
+                    { "id": "F", "label": "Nodo F" },
+                    { "id": "G", "label": "Nodo G" },
+                    { "id": "H", "label": "Nodo H" }
+                ],
+                "edges": [
+                    { "from": "A", "to": "C", "weight": 1, "directed": false },
+                    { "from": "A", "to": "B", "weight": 3, "directed": false },
+                    { "from": "B", "to": "G", "weight": 5, "directed": false },
+                    { "from": "B", "to": "D", "weight": 1, "directed": false },
+                    { "from": "C", "to": "F", "weight": 5, "directed": false },
+                    { "from": "C", "to": "D", "weight": 2, "directed": false },
+                    { "from": "D", "to": "F", "weight": 2, "directed": false },
+                    { "from": "D", "to": "E", "weight": 4, "directed": false },
+                    { "from": "E", "to": "G", "weight": 2, "directed": false },
+                    { "from": "E", "to": "H", "weight": 1, "directed": false },
+                    { "from": "F", "to": "H", "weight": 3, "directed": false }
+                ]
+            };
+            navigator.clipboard.writeText(JSON.stringify(example1, null, 2));
+            const btn = document.getElementById('copy-json-example1');
+            btn.textContent = '¡Copiado!';
+            setTimeout(() => {
+                btn.textContent = 'Copiar Ejemplo 1 - Grafo No Dirigido Simple';
+            }, 1800);
+        }
+
+        function copyJsonExample2() {
+            const example2 = {
+                "nodes": [
+                    {"id": "PC0", "label": "PC0"},
+                    {"id": "PC1", "label": "PC1"},
+                    {"id": "PC2", "label": "PC2"},
+                    {"id": "PC3", "label": "PC3"},
+                    {"id": "PC4", "label": "PC4"},
+                    {"id": "PC5", "label": "PC5"},
+                    {"id": "PC6", "label": "PC6"},
+                    {"id": "PC7", "label": "PC7"},
+                    {"id": "PC8", "label": "PC8"},
+                    {"id": "PC9", "label": "PC9"},
+                    {"id": "PC10", "label": "PC10"},
+                    {"id": "PC11", "label": "PC11"},
+                    {"id": "Laptop0", "label": "Laptop0"},
+                    {"id": "Laptop1", "label": "Laptop1"},
+                    {"id": "Server0", "label": "Server0"},
+                    {"id": "Server1", "label": "Server1"},
+                    {"id": "Server2", "label": "Server2"},
+                    {"id": "AccessPoint0", "label": "AccessPoint0"},
+                    {"id": "AccessPoint1", "label": "AccessPoint1"},
+                    {"id": "Switch0", "label": "Switch0"},
+                    {"id": "Switch1", "label": "Switch1"},
+                    {"id": "Switch2", "label": "Switch2"},
+                    {"id": "Switch3", "label": "Switch3"},
+                    {"id": "Router0", "label": "Router0"},
+                    {"id": "Router1", "label": "Router1"},
+                    {"id": "Router2", "label": "Router2"}
+                ],
+                "edges": [
+                    {"from": "PC0", "to": "Switch0", "weight": 1},
+                    {"from": "PC1", "to": "Switch0", "weight": 1},
+                    {"from": "PC2", "to": "Switch0", "weight": 1},
+                    {"from": "PC3", "to": "Switch1", "weight": 1},
+                    {"from": "PC4", "to": "Switch1", "weight": 1},
+                    {"from": "PC5", "to": "Switch1", "weight": 1},
+                    {"from": "PC6", "to": "Switch2", "weight": 1},
+                    {"from": "PC7", "to": "Switch2", "weight": 1},
+                    {"from": "PC8", "to": "Switch3", "weight": 1},
+                    {"from": "PC9", "to": "Switch3", "weight": 1},
+                    {"from": "PC10", "to": "Switch3", "weight": 1},
+                    {"from": "PC11", "to": "Switch3", "weight": 1},
+                    {"from": "Laptop0", "to": "AccessPoint0", "weight": 1},
+                    {"from": "Laptop1", "to": "AccessPoint1", "weight": 1},
+                    {"from": "Server0", "to": "Switch0", "weight": 1},
+                    {"from": "Server1", "to": "Switch2", "weight": 1},
+                    {"from": "Server2", "to": "Switch3", "weight": 1},
+                    {"from": "AccessPoint0", "to": "Switch2", "weight": 1},
+                    {"from": "AccessPoint1", "to": "Switch2", "weight": 1},
+                    {"from": "Switch0", "to": "Router0", "weight": 2},
+                    {"from": "Switch1", "to": "Router0", "weight": 2},
+                    {"from": "Switch2", "to": "Router1", "weight": 2},
+                    {"from": "Switch3", "to": "Router2", "weight": 2},
+                    {"from": "Router0", "to": "Router1", "weight": 5},
+                    {"from": "Router1", "to": "Router2", "weight": 5},
+                    {"from": "Router2", "to": "Router0", "weight": 5}
+                ]
+            };
+            const jsonStr = JSON.stringify(example2, null, 2);
+            navigator.clipboard.writeText(jsonStr);
+            const btn = document.getElementById('copy-json-example2');
+            btn.textContent = '¡Copiado!';
+            setTimeout(() => {
+                btn.textContent = 'Copiar Ejemplo 2 - Red de Computadoras';
+            }, 1800);
         }
     </script>
 </body>
